@@ -367,9 +367,13 @@ if(WITH_PNG)
 endif()
 
 # Qhull
+find_path(QHULL_ROOT Qhull
+    HINTS "$ENV{LOCAL_LIBS}/Qhull")
+find_path(QHULL_INCLUDE_DIR Qhull
+    HINTS "$ENV{LOCAL_LIBS}/Qhull/include")
 option(WITH_QHULL "Include convex-hull operations" TRUE)
 if(WITH_QHULL)
-  find_package(Qhull)
+  find_package(Qhull REQUIRED)
   if(NOT (${QHULL_LIBRARY_TYPE} MATCHES ${PCL_QHULL_REQUIRED_TYPE}) AND NOT (${PCL_QHULL_REQUIRED_TYPE} MATCHES "DONTCARE"))
     message(FATAL_ERROR "Qhull was selected with ${PCL_QHULL_REQUIRED_TYPE} but found as ${QHULL_LIBRARY_TYPE}")
   endif()

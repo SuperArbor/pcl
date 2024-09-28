@@ -104,25 +104,25 @@ endif()
 find_library(QHULL_LIBRARY_SHARED
              NAMES qhull_r qhull
              HINTS "${QHULL_ROOT}" "$ENV{QHULL_ROOT}"
-             PATHS "$ENV{PROGRAMFILES}/QHull" "$ENV{PROGRAMW6432}/QHull"
+             PATHS "$ENV{PROGRAMFILES}/QHull" "$ENV{PROGRAMW6432}/QHull" "$ENV{LOCAL_LIBS}/QHull"
              PATH_SUFFIXES project build bin lib)
 
 find_library(QHULL_LIBRARY_DEBUG
              NAMES qhull_rd qhull_d
              HINTS "${QHULL_ROOT}" "$ENV{QHULL_ROOT}"
-             PATHS "$ENV{PROGRAMFILES}/QHull" "$ENV{PROGRAMW6432}/QHull"
+             PATHS "$ENV{PROGRAMFILES}/QHull" "$ENV{PROGRAMW6432}/QHull" "$ENV{LOCAL_LIBS}/QHull"
              PATH_SUFFIXES project build bin lib debug/lib)
 
 find_library(QHULL_LIBRARY_STATIC
              NAMES qhullstatic_r
              HINTS "${QHULL_ROOT}" "$ENV{QHULL_ROOT}"
-             PATHS "$ENV{PROGRAMFILES}/QHull" "$ENV{PROGRAMW6432}/QHull"
+             PATHS "$ENV{PROGRAMFILES}/QHull" "$ENV{PROGRAMW6432}/QHull" "$ENV{LOCAL_LIBS}/QHull"
              PATH_SUFFIXES project build bin lib)
 
 find_library(QHULL_LIBRARY_DEBUG_STATIC
              NAMES qhullstatic_rd
              HINTS "${QHULL_ROOT}" "$ENV{QHULL_ROOT}"
-             PATHS "$ENV{PROGRAMFILES}/QHull" "$ENV{PROGRAMW6432}/QHull"
+             PATHS "$ENV{PROGRAMFILES}/QHull" "$ENV{PROGRAMW6432}/QHull" "$ENV{LOCAL_LIBS}/QHull"
              PATH_SUFFIXES project build bin lib debug/lib)
 
 if(QHULL_LIBRARY_SHARED AND QHULL_LIBRARY_STATIC)

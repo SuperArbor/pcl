@@ -1,5 +1,11 @@
 # Find and set Boost flags
 
+# 添加以下几行确保cmake能找到boost
+SET(BOOST_ROOT ${BOOST_ROOT} "C:/local/Boost")
+set(Boost_DEBUG ON)
+SET(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${BOOST_ROOT}/include")
+SET(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${BOOST_ROOT}/lib")
+
 # If we would like to compile against a dynamically linked Boost
 if(PCL_BUILD_WITH_BOOST_DYNAMIC_LINKING_WIN32 AND WIN32)
   set(Boost_USE_STATIC_LIBS OFF)
