@@ -43,6 +43,7 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_representation.h>
 #include <pcl/common/copy_point.h>
+#include <cassert>
 
 namespace pcl
 {
@@ -329,6 +330,15 @@ namespace pcl
       getMinPts () const
       {
         return (min_pts_);
+      }
+
+      /** \brief Gets whether the results should be sorted (ascending in the distance) or not
+        * Otherwise the results may be returned in any order.
+        */
+      inline bool
+      getSortedResults () const
+      {
+        return (sorted_);
       }
 
     protected:

@@ -64,7 +64,13 @@ pcl::RadiusOutlierRemoval<PointT>::applyFilterIndices (Indices &indices)
     else
       searcher_.reset (new pcl::search::KdTree<PointT> (false));
   }
-  searcher_->setInputCloud (input_);
+  if (!searcher_->setInputCloud (input_))
+  {
+    PCL_ERROR ("[pcl::%s::applyFilter] Error when initializing search method!\n", getClassName ().c_str ());
+    indices.clear ();
+    removed_indices_->clear ();
+    return;
+  }
 
   // The arrays to be used
   Indices nn_indices (indices_->size ());
@@ -132,7 +138,8 @@ pcl::RadiusOutlierRemoval<PointT>::applyFilterIndices (Indices &indices)
     {
       // Perform the radius search
       // Note: k includes the query point, so is always at least 1
-      int k = searcher_->radiusSearch (index, search_radius_, nn_indices, nn_dists);
+      // last parameter (max_nn) is the maximum number of neighbors returned. If enough neighbors are found so that point can not be an outlier, we stop searching.
+      int k = searcher_->radiusSearch (index, search_radius_, nn_indices, nn_dists, min_pts_radius_ + 1);
 
       // Points having too few neighbors are outliers and are passed to removed indices
       // Unless negative was set, then it's the opposite condition

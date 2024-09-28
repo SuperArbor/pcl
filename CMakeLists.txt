@@ -1,11 +1,5 @@
 ### ---[ PCL global CMake
-cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
-
-if(POLICY CMP0074)
-  # 1. Remove with 3.12.4.
-  # 2. Remove search paths with *_ROOT since they will be automatically checked
-  cmake_policy(SET CMP0074 NEW)
-endif()
+cmake_minimum_required(VERSION 3.16.3 FATAL_ERROR)
 
 # Set target C++ standard and required compiler features
 set(CMAKE_CXX_STANDARD 14 CACHE STRING "The target C++ standard. PCL requires C++14 or higher.")
@@ -23,7 +17,7 @@ if("${CMAKE_BUILD_TYPE}" STREQUAL "")
   set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING "build type default to RelWithDebInfo, set to Release to improve performance" FORCE)
 endif()
 
-project(PCL VERSION 1.13.1.99)
+project(PCL VERSION 1.14.1.99)
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
 
 if(MSVC AND ("${MSVC_VERSION}" LESS 1910))
@@ -144,7 +138,7 @@ if(CMAKE_COMPILER_IS_GNUCXX)
 endif()
 
 if(CMAKE_COMPILER_IS_MSVC)
-  add_definitions("-DBOOST_ALL_NO_LIB -D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS -DNOMINMAX -DPCL_ONLY_CORE_POINT_TYPES ${SSE_DEFINITIONS}")
+  add_definitions("-DBOOST_ALL_NO_LIB -D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS -DNOMINMAX ${SSE_DEFINITIONS}")
   
   if("${CMAKE_CXX_FLAGS}" STREQUAL "${CMAKE_CXX_FLAGS_DEFAULT}")
     string(APPEND CMAKE_CXX_FLAGS " /fp:precise ${SSE_FLAGS} ${AVX_FLAGS}")
@@ -232,10 +226,6 @@ if(CMAKE_COMPILER_IS_CLANG)
   set(CLANG_LIBRARIES "stdc++")
 endif()
 
-if(CMAKE_COMPILER_IS_MINGW)
-  add_definitions(-DPCL_ONLY_CORE_POINT_TYPES)
-endif()
-
 include("${PCL_SOURCE_DIR}/cmake/pcl_utils.cmake")
 DISSECT_VERSION()
 GET_OS_INFO()
@@ -318,14 +308,20 @@ endif()
 # Threads (required)
 find_package(Threads REQUIRED)
 
-# Eigen (required)
-find_package(Eigen 3.3 REQUIRED)
-include_directories(SYSTEM ${EIGEN_INCLUDE_DIRS})
+# Eigen3 (required)
+find_package(Eigen3 3.3 REQUIRED NO_MODULE)
+if(NOT EIGEN3_FOUND AND Eigen3_FOUND)
+    set(EIGEN3_FOUND ${Eigen3_FOUND})
+endif()
 
-# FLANN (required)
-find_package(FLANN 1.9.1 REQUIRED)
-if(NOT (${FLANN_LIBRARY_TYPE} MATCHES ${PCL_FLANN_REQUIRED_TYPE}) AND NOT (${PCL_FLANN_REQUIRED_TYPE} MATCHES "DONTCARE"))
-  message(FATAL_ERROR "Flann was selected with ${PCL_FLANN_REQUIRED_TYPE} but found as ${FLANN_LIBRARY_TYPE}")
+# FLANN
+find_package(FLANN 1.9.1)
+if(NOT FLANN_FOUND)
+  message(WARNING "Flann was not found, so many PCL modules will not be built!")
+else()
+  if(NOT (${FLANN_LIBRARY_TYPE} MATCHES ${PCL_FLANN_REQUIRED_TYPE}) AND NOT (${PCL_FLANN_REQUIRED_TYPE} MATCHES "DONTCARE"))
+    message(FATAL_ERROR "Flann was selected with ${PCL_FLANN_REQUIRED_TYPE} but found as ${FLANN_LIBRARY_TYPE}")
+  endif()
 endif()
 
 # libusb
@@ -343,26 +339,12 @@ PCL_ADD_GRABBER_DEPENDENCY("DSSDK" "DepthSense SDK support")
 PCL_ADD_GRABBER_DEPENDENCY("RSSDK" "RealSense SDK support")
 PCL_ADD_GRABBER_DEPENDENCY("RSSDK2" "RealSense SDK 2.0 (librealsense) support")
 
-# metslib
-if(PKG_CONFIG_FOUND)
-  pkg_check_modules(METSLIB metslib)
-  if(METSLIB_FOUND)
-    set(HAVE_METSLIB ON)
-    include_directories(SYSTEM ${METSLIB_INCLUDE_DIRS})
-  else()
-    include_directories(SYSTEM "${PCL_SOURCE_DIR}/recognition/include/pcl/recognition/3rdparty/")
-  endif()
-else()
-    include_directories(SYSTEM ${PCL_SOURCE_DIR}/recognition/include/pcl/recognition/3rdparty/)
-endif()
-
 # LibPNG
 option(WITH_PNG "PNG file support" TRUE)
 if(WITH_PNG)
   find_package(PNG)
   if(PNG_FOUND)
     set(HAVE_PNG ON)
-    include_directories(SYSTEM "${PNG_INCLUDE_DIR}")
   endif()
 endif()
 
@@ -383,6 +365,12 @@ endif()
 option(WITH_CUDA "Build NVIDIA-CUDA support" TRUE)
 if(WITH_CUDA)
   include("${PCL_SOURCE_DIR}/cmake/pcl_find_cuda.cmake")
+endif()
+
+# find GLEW before VTK as it uses custom findGLEW that doesn't work with cmakes findGLEW.
+option(WITH_GLEW "Support for GLEW" TRUE)
+if(WITH_GLEW)
+  find_package(GLEW QUIET)
 endif()
 
 
@@ -419,6 +407,25 @@ endif()
 
 # Boost (required)
 include("${PCL_SOURCE_DIR}/cmake/pcl_find_boost.cmake")
+
+# System zlib (for nurbs on surface)
+option(WITH_SYSTEM_ZLIB "Use system zlib" TRUE)
+if(WITH_SYSTEM_ZLIB)
+  find_package(ZLIB)
+  if(ZLIB_FOUND)
+    set(HAVE_ZLIB ON)
+  endif()
+endif()
+
+option(WITH_SYSTEM_CJSON "Use system cJSON" TRUE)
+if(WITH_SYSTEM_CJSON)
+  find_package(cJSON)
+  if(cJSON_FOUND)
+    set(HAVE_CJSON ON)
+  else()
+    message(WARNING "It is recommended to install an up-to-date version of cJSON on your system. CMake did not find one, and will instead use a cJSON version bundled with the PCL source code. However, that is an older version which may pose a risk and may be removed in a future PCL release.")
+  endif()
+endif()
 
 ### ---[ Create the config.h file
 set(pcl_config_h_in "${CMAKE_CURRENT_SOURCE_DIR}/pcl_config.h.in")

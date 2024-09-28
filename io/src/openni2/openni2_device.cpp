@@ -48,10 +48,7 @@ using namespace pcl::io::openni2;
 using openni::VideoMode;
 using std::vector;
 
-pcl::io::openni2::OpenNI2Device::OpenNI2Device (const std::string& device_URI) :
-  ir_video_started_(false),
-  color_video_started_(false),
-  depth_video_started_(false)
+pcl::io::openni2::OpenNI2Device::OpenNI2Device (const std::string& device_URI)
 {
   openni::Status status = openni::OpenNI::initialize ();
   if (status != openni::STATUS_OK)
@@ -59,7 +56,7 @@ pcl::io::openni2::OpenNI2Device::OpenNI2Device (const std::string& device_URI) :
 
   openni_device_.reset (new openni::Device);
 
-  if (device_URI.length () > 0)
+  if (!device_URI.empty())
     status = openni_device_->open (device_URI.c_str ());
   else
     status = openni_device_->open (openni::ANY_DEVICE);

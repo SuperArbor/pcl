@@ -83,7 +83,7 @@ endif()
 
 find_file(QHULL_HEADER
           NAMES libqhull_r.h
-          HINTS "${QHULL_ROOT}" "$ENV{QHULL_ROOT}" "${QHULL_INCLUDE_DIR}"
+          HINTS "${QHULL_INCLUDE_DIR}"
           PATHS "$ENV{PROGRAMFILES}/QHull" "$ENV{PROGRAMW6432}/QHull"
           PATH_SUFFIXES qhull_r src/libqhull_r libqhull_r include)
 

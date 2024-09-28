@@ -40,7 +40,9 @@
 #pragma once
 
 #include <pcl/pcl_base.h>
+#include <pcl/search/search.h> // for pcl::search::Search
 #include <boost/optional.hpp>
+#include <pcl/search/search.h>
 
 namespace pcl
 {
